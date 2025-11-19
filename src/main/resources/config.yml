@@ -1,0 +1,41 @@
+# NilsANG DeathBan Konfiguration
+
+# Dauer des DeathBans (parsebar: 1d2h30m, 24h, 90m, etc.)
+banDuration: "24h"
+
+# MiniMessage Prefix für Nachrichten im Spiel
+# Beispiel: <gradient:#9483ff:#fb9af2>NilsANG</gradient>
+prefix: "<gradient:#9483ff:#fb9af2>NilsANG</gradient>"
+
+# Format für Datum/Zeit in Minecraft-Nachrichten
+# z. B. 11.10.2025 20:15:00
+dateTimeFormat: "dd.MM.yyyy HH:mm:ss"
+
+# Nachricht beim Kick direkt nach dem Tod (mehrzeilig erlaubt)
+# Platzhalter: %spielername%, %X%, %Y%, %Z%, %dimension_phrase%, %time%, %duration%, %until%
+banMessage: |
+  <gray>Du bist gestorben und für <yellow>%duration%</yellow> gebannt.</gray>
+  <gray>Koordinaten: <white>X: %X%, Y: %Y%, Z: %Z%</white> (<white>%dimension_phrase%</white>)</gray>
+  <gray>Zeit: <white>%time%</white> | Ende: <white>%until%</white></gray>
+
+# Nachricht, wenn ein gebannter Spieler versucht zu joinen
+# Platzhalter: %remaining%, %until%
+joinDenyMessage: |
+  <red>Du bist noch für <yellow>%remaining%</yellow> gesperrt.</red>
+  <gray>Ende: <white>%until%</white></gray>
+
+# Moderatorenmodus: Spieler mit Permission nilsang.deathban.moderator werden nicht gebannt,
+# sondern in Spectator gesetzt und dürfen den Modus bis zum Ende nicht verlassen
+moderator:
+  enabled: true
+  enterMessage: "<yellow>Du bist gestorben. Du wirst bis <white>%until%</white> in den Zuschauermodus versetzt."
+  restoreMessage: "<green>Deine Todeszeit ist vorbei. Du bist nun wieder im Survival."
+
+# Ob Spieler mit Permission nilsang.deathban.exempt ausgenommen sind
+respectExemptPermission: true
+
+# Optional: Welt-Namen/Bezeichnungen
+worldNames:
+  normal: "Oberwelt"
+  nether: "Nether"
+  the_end: "End"

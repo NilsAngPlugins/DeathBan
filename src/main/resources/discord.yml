@@ -1,0 +1,42 @@
+# Discord Integration für NilsANG DeathBan
+
+# Aktiviere/Deaktiviere Discord-Benachrichtigungen
+enabled: true
+
+# Discord Webhook URL
+webhookUrl: ""
+
+# Sende als Embed (mit optionalem Spielerkopf-Icon)
+useEmbed: true
+
+# Erwünschte Erwähnungen (z. B. @here) – wird als reiner Text gesendet
+mentions: ""
+
+# Avatar-Grafik für den Webhook (leer = Standard des Webhooks)
+# Platzhalter erlaubt: %spielername%
+avatarUrl: "https://mc-heads.net/avatar/%spielername%/64"
+
+# Username für den Webhook (leer = Standard des Webhooks)
+username: "NilsANG DeathBan"
+
+# Plain-Text Nachricht (wenn useEmbed=false)
+# Platzhalter: %spielername%, %X%, %Y%, %Z%, %dimension_phrase%, %timestamp%
+message: "**%spielername%** ist <t:%timestamp%> an den Koordinaten X: %X%, Y: %Y%, Z: %Z% in der %dimension_phrase% gestorben!"
+
+# Embed-Konfiguration (wenn useEmbed=true)
+embed:
+  title: "DeathBan"
+  description: "**%spielername%** ist <t:%timestamp%> gestorben."
+  color: 0xFF0000
+  footer: "NilsANG"
+  thumbnail: "https://mc-heads.net/head/%spielername%/64"
+  fields:
+    - name: "Coords:"
+      value: "X: %X%, Y: %Y%, Z: %Z%"
+      inline: true
+    - name: "Welt:"
+      value: "%dimension_phrase%"
+      inline: true
+    - name: "Todesgrund"
+      value: "%todesgrund%"
+      inline: false
