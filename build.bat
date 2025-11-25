@@ -6,7 +6,7 @@ cd /d "%~dp0"
 set WRAPPER=gradlew.bat
 set GRADLE_EXE=%ProgramData%\chocolatey\lib\gradle\tools\gradle-9.1.0\bin\gradle.bat
 
-echo === NilsANG-DeathBan Build ===
+echo === DeathBan Build ===
 
 if not exist "%WRAPPER%" (
 	echo Gradle Wrapper nicht gefunden. Erzeuge Wrapper 8.10.2 ...
@@ -32,7 +32,7 @@ if errorlevel 1 (
 	exit /b 1
 )
 
-set OUT=build\libs\NilsANG-DeathBan-0.1.0-SNAPSHOT.jar
+set OUT=build\libs\DeathBan-0.1.0-SNAPSHOT.jar
 if not exist "%OUT%" (
 	echo Fehler: Artefakt nicht gefunden: %OUT%
 	dir build\libs
@@ -40,11 +40,11 @@ if not exist "%OUT%" (
 )
 
 if not exist "..\server\plugins" mkdir "..\server\plugins"
-copy /Y "%OUT%" "..\server\plugins\NilsANG-DeathBan.jar" >nul
+copy /Y "%OUT%" "..\server\plugins\DeathBan.jar" >nul
 if errorlevel 1 (
 	echo Fehler: Kopieren fehlgeschlagen.
 	exit /b 1
 )
 
-echo OK: Kopiert nach plugins\NilsANG-DeathBan.jar
+echo OK: Kopiert nach plugins\DeathBan.jar
 exit /b 0

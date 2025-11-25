@@ -6,4 +6,4 @@ pluginManagement {
 	}
 }
 
-rootProject.name = "NilsANG-DeathBan"
+rootProject.name = "DeathBan"
