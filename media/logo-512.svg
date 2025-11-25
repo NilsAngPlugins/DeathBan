@@ -45,3 +45,4 @@
   <!-- Subtle glow behind skull -->
   <circle cx="512" cy="540" r="230" fill="url(#accent)" opacity="0.08"/>
 </svg>
+
