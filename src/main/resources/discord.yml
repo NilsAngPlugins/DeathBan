@@ -17,7 +17,7 @@ mentions: ""
 avatarUrl: "https://mc-heads.net/avatar/%spielername%/64"
 
 # Username für den Webhook (leer = Standard des Webhooks)
-username: "NilsANG DeathBan"
+username: "DeathBan"
 
 # Plain-Text Nachricht (wenn useEmbed=false)
 # Platzhalter: %spielername%, %X%, %Y%, %Z%, %dimension_phrase%, %timestamp%

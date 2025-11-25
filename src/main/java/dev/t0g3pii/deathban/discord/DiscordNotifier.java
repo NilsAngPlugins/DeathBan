@@ -1,4 +1,4 @@
-package dev.nilsang.deathban.discord;
+package dev.t0g3pii.deathban.discord;
 
 import org.bukkit.configuration.file.FileConfiguration;
 

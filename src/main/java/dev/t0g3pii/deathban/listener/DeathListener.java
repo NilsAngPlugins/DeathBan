@@ -1,10 +1,5 @@
-package dev.nilsang.deathban.listener;
+package dev.t0g3pii.deathban.listener;
 
-import dev.nilsang.deathban.core.DeathBanService;
-import dev.nilsang.deathban.discord.DiscordNotifier;
-import dev.nilsang.deathban.store.ModSpectateRecord;
-import dev.nilsang.deathban.store.ModSpectateStore;
-import dev.nilsang.deathban.util.DiscordLinkUtil;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -15,6 +10,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+
+import dev.t0g3pii.deathban.core.DeathBanService;
+import dev.t0g3pii.deathban.discord.DiscordNotifier;
+import dev.t0g3pii.deathban.store.ModSpectateRecord;
+import dev.t0g3pii.deathban.store.ModSpectateStore;
+import dev.t0g3pii.deathban.util.DiscordLinkUtil;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -42,11 +43,12 @@ public class DeathListener implements Listener {
 	@EventHandler
 	public void onDeath(PlayerDeathEvent event) {
 		Player p = event.getEntity();
-		if (config.getBoolean("respectExemptPermission", true) && p.hasPermission("nilsang.deathban.exempt")) {
+		if (config.getBoolean("respectExemptPermission", true) && p.hasPermission("deathban.exempt")) {
 			return;
 		}
 
-		boolean moderatorMode = config.getBoolean("moderator.enabled", true) && p.hasPermission("nilsang.deathban.moderator");
+		boolean moderatorMode = config.getBoolean("moderator.enabled", true) && (p.hasPermission("deathban.moderator") || p.hasPermission("deathban.streamer"));
+		boolean streamerMode = moderatorMode && p.hasPermission("deathban.streamer");
 		Location loc = p.getLocation();
 		long now = Instant.now().getEpochSecond();
 
@@ -56,7 +58,7 @@ public class DeathListener implements Listener {
 		String funnyReason = buildFunnyReason(event);
 
 		if (moderatorMode) {
-			long until = now + dev.nilsang.deathban.util.DurationParser.parseOrThrow(config.getString("banDuration", "24h")).toSeconds();
+			long until = now + dev.t0g3pii.deathban.util.DurationParser.parseOrThrow(config.getString("banDuration", "24h")).toSeconds();
 			ModSpectateRecord rec = new ModSpectateRecord(until, p.getName(), service.worldKey(p.getWorld()), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), now);
 			modStore.putRecord(p.getUniqueId(), rec);
 			modStore.save();
@@ -67,6 +69,11 @@ public class DeathListener implements Listener {
 				String msg = config.getString("moderator.enterMessage", "<yellow>Du bist im Zuschauermodus bis %until%.")
 						.replace("%until%", untilFormatted);
 				p.sendMessage(mm.deserialize(service.getPrefix() + " " + msg));
+				if (streamerMode) {
+					String kickMsg = config.getString("moderator.streamerKickMessage", "<gray>Stream-Übergang. Du wurdest kurz getrennt.</gray>")
+							.replace("%until%", untilFormatted);
+					p.kick(mm.deserialize(service.getPrefix() + " " + kickMsg));
+				}
 			});
 			if (discord.isEnabled()) {
 				String playerName = p.getName();
@@ -115,7 +122,7 @@ public class DeathListener implements Listener {
 				.replace("%X%", String.valueOf(loc.getBlockX()))
 				.replace("%Y%", String.valueOf(loc.getBlockY()))
 				.replace("%Z%", String.valueOf(loc.getBlockZ()))
-				.replace("%dimension_phrase%", dimensionPhrase)
+				.replace("%dimension_phrase%", service.formatDimensionPhrase(p.getWorld()))
 				.replace("%time%", timeFormatted)
 				.replace("%until%", untilFormatted)
 				.replace("%duration%", humanDuration(remaining));

@@ -1,9 +1,5 @@
-package dev.nilsang.deathban.command;
+package dev.t0g3pii.deathban.command;
 
-import dev.nilsang.deathban.NilsAngDeathBanPlugin;
-import dev.nilsang.deathban.core.DeathBanService;
-import dev.nilsang.deathban.store.BanRecord;
-import dev.nilsang.deathban.store.ModSpectateRecord;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -11,6 +7,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import dev.t0g3pii.deathban.NilsAngDeathBanPlugin;
+import dev.t0g3pii.deathban.core.DeathBanService;
+import dev.t0g3pii.deathban.store.BanRecord;
+import dev.t0g3pii.deathban.store.ModSpectateRecord;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -33,7 +34,7 @@ public class DeathBanCommand implements CommandExecutor {
 		MiniMessage mm = service.mm();
 		String px = service.getPrefix();
 
-		if (!(sender.hasPermission("nilsang.deathban.admin"))) {
+		if (!(sender.hasPermission("deathban.admin"))) {
 			sender.sendMessage(mm.deserialize(px + " <red>Du hast keine Berechtigung.</red>"));
 			return true;
 		}

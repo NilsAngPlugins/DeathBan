@@ -1,20 +1,23 @@
-name: NilsANG-DeathBan
+name: DeathBan
 version: ${version}
-main: dev.nilsang.deathban.NilsAngDeathBanPlugin
+main: dev.t0g3pii.deathban.NilsAngDeathBanPlugin
 api-version: '1.21'
-authors: ["NilsANG"]
+authors: ["t0g3pii"]
 softdepend: ["PlaceholderAPI", "AdvancedBan", "DiscordSRV"]
 commands:
   deathban:
-    description: Verwaltung für NilsANG DeathBan
+    description: Verwaltung für DeathBan
     usage: /deathban <reload|unban|remaining|list|listmods|modunban> [spieler]
 permissions:
-  nilsang.deathban.exempt:
+  deathban.exempt:
     description: Spieler mit dieser Permission sind nicht vom DeathBan betroffen
     default: false
-  nilsang.deathban.moderator:
+  deathban.moderator:
     description: Moderatoren werden statt gebannt in den Spectator versetzt
     default: false
-  nilsang.deathban.admin:
+  deathban.streamer:
+    description: Streamer-Flow (wie Moderator) plus einmaliger Kick nach dem Tod
+    default: false
+  deathban.admin:
     description: Adminrechte für Reload/Unban/Abfragen
     default: op

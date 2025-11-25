@@ -1,4 +1,4 @@
-package dev.nilsang.deathban.util;
+package dev.t0g3pii.deathban.util;
 
 import java.time.Duration;
 import java.util.regex.Matcher;

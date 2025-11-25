@@ -1,8 +1,5 @@
-package dev.nilsang.deathban.listener;
+package dev.t0g3pii.deathban.listener;
 
-import dev.nilsang.deathban.core.DeathBanService;
-import dev.nilsang.deathban.store.ModSpectateRecord;
-import dev.nilsang.deathban.store.ModSpectateStore;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -12,6 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
+
+import dev.t0g3pii.deathban.core.DeathBanService;
+import dev.t0g3pii.deathban.store.ModSpectateRecord;
+import dev.t0g3pii.deathban.store.ModSpectateStore;
+
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.time.Instant;

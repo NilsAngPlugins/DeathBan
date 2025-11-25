@@ -5,7 +5,7 @@ Ein leichtgewichtiges DeathBan-Plugin für Purpur/Paper: nach dem Tod wird der S
 ### Features
 - **DeathBan**: Ban direkt nach Tod für eine Dauer wie `24h`, `1d2h30m`, `90m` (persistiert in `bans.yml`).
 - **Discord-Webhook**: Schönes Embed mit Titel, Farbe (Rot), 3D-Spielerkopf, Feldern (Coords, Welt, Todesgrund) und Zeitstempel; konfigurierbar über `discord.yml`.
-- **MiniMessage**: Farbige Nachrichten ingame (Prefix: `<gradient:#9483ff:#fb9af2>NilsANG</gradient>`).
+- **MiniMessage**: Farbige Nachrichten ingame (Prefix: `<gradient:#9483ff:#fb9af2>DeathBan</gradient>`).
 - **Moderator-Flow**: Mit Permission werden Moderatoren nicht gebannt, sondern bis zum Ablauf in Spectator gesetzt; GameMode-Wechsel blockiert; nach Ablauf Teleport zum Respawnpunkt (Bett/Anker, sonst Welt-Spawn) und **dann** SURVIVAL (persistiert in `mod_spectate.yml`).
 - **Reload & Verwaltung**: Befehle für Reload, Unban, Restzeit-Anzeige und Listen für alle aktiven Bans/Mod-Sperren.
 
@@ -22,7 +22,7 @@ Ein leichtgewichtiges DeathBan-Plugin für Purpur/Paper: nach dem Tod wird der S
 `config.yml`
 ```yml
 banDuration: "24h"
-prefix: "<gradient:#9483ff:#fb9af2>NilsANG</gradient>"
+prefix: "<gradient:#9483ff:#fb9af2>DeathBan</gradient>"
 dateTimeFormat: "dd.MM.yyyy HH:mm:ss"
 banMessage: |
   <gray>Du bist gestorben und für <yellow>%duration%</yellow> gebannt.</gray>
@@ -48,7 +48,7 @@ webhookUrl: ""
 useEmbed: true
 mentions: ""
 avatarUrl: "https://mc-heads.net/avatar/%spielername%/64"
-username: "NilsANG DeathBan"
+username: "DeathBan"
 embed:
   title: "DeathBan"
   description: "**%spielername%** ist <t:%timestamp%> gestorben."
@@ -86,9 +86,9 @@ embed:
 - `/deathban modunban <spieler>` – Moderator-Spectator-Sperre aufheben
 
 ### Berechtigungen
-- `nilsang.deathban.admin` – Zugriff auf Admin-Befehle (default: op)
-- `nilsang.deathban.exempt` – Spieler ist vom DeathBan ausgenommen
-- `nilsang.deathban.moderator` – Moderator-Spectator-Flow statt Ban
+- `deathban.admin` – Zugriff auf Admin-Befehle (default: op)
+- `deathban.exempt` – Spieler ist vom DeathBan ausgenommen
+- `deathban.moderator` – Moderator-Spectator-Flow statt Ban
 
 ### Build
 - Windows: `build.bat` im Projekt ausführen (Gradle-Wrapper wird automatisch erzeugt, Artefakt wird nach `plugins/NilsANG-DeathBan.jar` kopiert).

@@ -1,4 +1,4 @@
-package dev.nilsang.deathban.store;
+package dev.t0g3pii.deathban.store;
 
 public class ModSpectateRecord {
 	public final long untilEpochSeconds;

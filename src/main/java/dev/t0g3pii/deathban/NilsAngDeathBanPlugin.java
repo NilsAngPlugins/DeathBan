@@ -1,14 +1,5 @@
-package dev.nilsang.deathban;
+package dev.t0g3pii.deathban;
 
-import dev.nilsang.deathban.command.DeathBanCommand;
-import dev.nilsang.deathban.core.DeathBanService;
-import dev.nilsang.deathban.discord.DiscordNotifier;
-import dev.nilsang.deathban.listener.DeathListener;
-import dev.nilsang.deathban.listener.GameModeGuardListener;
-import dev.nilsang.deathban.listener.JoinListener;
-import dev.nilsang.deathban.store.BanStore;
-import dev.nilsang.deathban.store.ModSpectateRecord;
-import dev.nilsang.deathban.store.ModSpectateStore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -17,6 +8,17 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import dev.t0g3pii.deathban.command.DeathBanCommand;
+import dev.t0g3pii.deathban.core.DeathBanService;
+import dev.t0g3pii.deathban.discord.DiscordNotifier;
+import dev.t0g3pii.deathban.listener.DeathListener;
+import dev.t0g3pii.deathban.listener.GameModeGuardListener;
+import dev.t0g3pii.deathban.listener.JoinListener;
+import dev.t0g3pii.deathban.papi.DeathBanExpansion;
+import dev.t0g3pii.deathban.store.BanStore;
+import dev.t0g3pii.deathban.store.ModSpectateRecord;
+import dev.t0g3pii.deathban.store.ModSpectateStore;
 
 import java.io.File;
 import java.time.Instant;
@@ -52,6 +54,10 @@ public final class NilsAngDeathBanPlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new JoinListener(service, getConfig(), modSpectateStore), this);
 		getServer().getPluginManager().registerEvents(new GameModeGuardListener(modSpectateStore, service.getPrefix()), this);
 		getCommand("deathban").setExecutor(new DeathBanCommand(this));
+
+		if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+			new DeathBanExpansion(this).register();
+		}
 
 		startModeratorRestoreTask();
 
