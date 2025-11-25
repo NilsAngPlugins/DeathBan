@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.util;
+package de.t0g3pii.deathban.util;
 
 import java.lang.reflect.Method;
 import java.util.UUID;

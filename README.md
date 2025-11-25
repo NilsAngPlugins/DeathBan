@@ -1,102 +1,131 @@
-## NilsANG DeathBan (Purpur 1.21.10, Java 21)
+# DeathBan (Purpur/Paper 1.21.10+, Java 21)
 
-Ein leichtgewichtiges DeathBan-Plugin für Purpur/Paper: nach dem Tod wird der Spieler für eine konfigurierbare Dauer gebannt und optional ein Discord-Embed an einen Webhook gesendet. Moderatoren können stattdessen automatisch in den Zuschauermodus versetzt werden.
+Leichtgewichtiges, produktiv erprobtes DeathBan-Plugin für Purpur/Paper-Server. Nach dem Tod wird ein Spieler für eine konfigurierbare Dauer gebannt und (optional) ein schönes Discord‑Embed verschickt. Moderatoren/Streamer werden nicht dauerhaft gebannt, sondern in den Zuschauermodus versetzt – mit sicherem Rückteleport zum Spawn nach Ablauf.
 
-### Features
-- **DeathBan**: Ban direkt nach Tod für eine Dauer wie `24h`, `1d2h30m`, `90m` (persistiert in `bans.yml`).
-- **Discord-Webhook**: Schönes Embed mit Titel, Farbe (Rot), 3D-Spielerkopf, Feldern (Coords, Welt, Todesgrund) und Zeitstempel; konfigurierbar über `discord.yml`.
-- **MiniMessage**: Farbige Nachrichten ingame (Prefix: `<gradient:#9483ff:#fb9af2>DeathBan</gradient>`).
-- **Moderator-Flow**: Mit Permission werden Moderatoren nicht gebannt, sondern bis zum Ablauf in Spectator gesetzt; GameMode-Wechsel blockiert; nach Ablauf Teleport zum Respawnpunkt (Bett/Anker, sonst Welt-Spawn) und **dann** SURVIVAL (persistiert in `mod_spectate.yml`).
-- **Reload & Verwaltung**: Befehle für Reload, Unban, Restzeit-Anzeige und Listen für alle aktiven Bans/Mod-Sperren.
+## Features
+- 🔒 **DeathBan**: Ban direkt nach Tod für eine Dauer wie `24h`, `1d2h30m`, `90m` (persistiert in `bans.yml`).
+- 🧵 **Eigene Bann‑Nachrichten**: In‑Game via MiniMessage (`prefix`, `%time%`, `%until%`, `%dimension_phrase%`, Koordinaten u. a.).
+- 💬 **Discord‑Webhook (optional)**: Rotes Embed, 3D‑Spielerkopf, Felder (Coords, Welt, Todesgrund), `<t:%timestamp%>` für relative Zeitdarstellung. Konfigurierbar in `discord.yml`.
+- 🛡️ **Moderator‑Flow** (`deathban.moderator`): Statt Ban → Spectator bis Ablauf; GameMode‑Wechsel wird blockiert; nach Ablauf: Teleport zum sicheren Respawn (Bett/Anker, sonst Weltspawn) und Wechsel zurück nach SURVIVAL.
+- 📹 **Streamer‑Flow** (`deathban.streamer`): Wie Moderator, zusätzlich einmaliger **Kick direkt nach dem Tod** (sauberer Stream‑Cut), danach automatisch Spectator bis Ablauf.
+- 🧭 **Sicherer Respawn**: Ende der Sperre → Teleport auf höchste sichere Y über Spawn und Wechsel zu SURVIVAL, auch wenn der Spieler erst später joint.
+- 🧩 **PlaceholderAPI‑Integration**: `%deathban_players%`, `%deathban_mods%`, `%deathban_total%`.
+- 🧰 **Kommandos & Autocomplete**: Komfortables Tab‑Completion (nur relevante Ziele bei `unban`/`modunban`).
+- 🧾 **Persistenz**: `bans.yml` (Spieler‑Bans) und `mod_spectate.yml` (Moderator/Streamer‑Sperren).
 
-### Anforderungen
-- **Server**: Purpur/Paper 1.21.10+
+## Anforderungen
+- **Server**: Purpur/Paper 1.21.10 oder neuer
 - **Java**: 21
-- **Optional**: PlaceholderAPI (für eigene Placeholder), DiscordSRV (für automatische Mentions `<@id>` im Todesgrund)
+- **Optional**: 
+  - [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) – zusätzliche Platzhalter
+  - [DiscordSRV](https://github.com/DiscordSRV/DiscordSRV) – Discord‑Mentions `<@id>` im Todesgrund
+  - (Soft‑Depend: `PlaceholderAPI`, `AdvancedBan`, `DiscordSRV`)
 
-### Installation
-- Release-JAR in den Ordner `plugins/` legen und Server starten.
-- Alternativ: selbst bauen (siehe Abschnitt Build).
+## Installation
+1. JAR in `server/plugins/` kopieren.
+2. Server starten → `plugins/DeathBan/` mit `config.yml`, `discord.yml` etc. wird angelegt.
+3. Optional: `discord.yml` mit Webhook‐URL ausfüllen.
 
-### Konfiguration (Auszug)
-`config.yml`
+## Build (Windows)
+- `build.bat` im Projektordner `DeathBan/` ausführen. Das Skript erzeugt automatisch den Gradle‑Wrapper (8.10.2), baut `shadowJar` und kopiert die JAR nach `plugins/DeathBan.jar`.
+- Alternativ: `gradlew clean shadowJar` und `build/libs/DeathBan-<version>.jar` manuell kopieren.
+
+## Konfiguration (Auszug)
+`src/main/resources/config.yml`
 ```yml
+# DeathBan Konfiguration
 banDuration: "24h"
 prefix: "<gradient:#9483ff:#fb9af2>DeathBan</gradient>"
 dateTimeFormat: "dd.MM.yyyy HH:mm:ss"
+
+# Nachricht beim Kick direkt nach dem Tod
 banMessage: |
   <gray>Du bist gestorben und für <yellow>%duration%</yellow> gebannt.</gray>
   <gray>Koordinaten: <white>X: %X%, Y: %Y%, Z: %Z%</white> (<white>%dimension_phrase%</white>)</gray>
   <gray>Zeit: <white>%time%</white> | Ende: <white>%until%</white></gray>
+
+# Nachricht beim Join während aktiver Sperre
 joinDenyMessage: |
   <red>Du bist noch für <yellow>%remaining%</yellow> gesperrt.</red>
   <gray>Ende: <white>%until%</white></gray>
+
+# Moderatoren/Streamer
 moderator:
   enabled: true
   enterMessage: "<yellow>Du bist gestorben. Du wirst bis <white>%until%</white> in den Zuschauermodus versetzt."
   restoreMessage: "<green>Deine Todeszeit ist vorbei. Du bist nun wieder im Survival."
+  # Zusätzlich nur für Streamer (einmaliger Kick direkt nach Tod):
+  streamerKickMessage: |
+    <gray>Stream-Übergang:</gray> <white>Du wurdest kurz getrennt.</white>
+    <gray>Du bist bis <white>%until%</white> im Zuschauermodus.</gray>
+
+# Weltbezeichnungen für %dimension_phrase%
 worldNames:
   normal: "Oberwelt"
   nether: "Nether"
   the_end: "End"
+
+# Spieler mit dieser Permission werden nie gebannt
+respectExemptPermission: true
 ```
 
-`discord.yml`
+`src/main/resources/discord.yml`
 ```yml
 enabled: true
 webhookUrl: ""
-useEmbed: true
-mentions: ""
+useBreed: true
+mentions: ""               # z. B. @here
 avatarUrl: "https://mc-heads.net/avatar/%spielername%/64"
 username: "DeathBan"
 embed:
   title: "DeathBan"
   description: "**%spielername%** ist <t:%timestamp%> gestorben."
   color: 0xFF0000
-  footer: "NilsANG"
+  footer: "DeathBan"
   thumbnail: "https://mc-heads.net/head/%spielername%/64"
   fields:
     - name: "Coords:"
       value: "X: %X%, Y: %Y%, Z: %Z%"
       inline: true
     - name: "Welt:"
-      value: "%dimension_phrase%"
+      value: "%s%"   # z. B. „in der Oberwelt“
       inline: true
     - name: "Todesgrund"
       value: "%todesgrund%"
       inline: false
 ```
 
-### Platzhalter (Auswahl)
-- **%spielername%**: Spielername
-- **%X% %Y% %Z%**: Block-Koordinaten
-- **%dimension_phrase%**: "in der Oberwelt" / "im Nether" / "im End"
-- **%time%**: formatierte Todeszeit gemäß `dateTimeFormat`
-- **%until%**: formatiertes Ban-Ende gemäß `dateTimeFormat`
-- **%remaining%**: verbleibende Dauer (z. B. `1d2h`)
-- **%timestamp%**: Unix-Zeit (für Discord `<t:%timestamp%>`) 
-- **%todesgrund%**: humorvoller Text je nach Ursache, inkl. DiscordSRV-Ping (falls verlinkt)
+## Platzhalter
+- `%spielername%`, `%X%`, `%Y%`, `%Z%`
+- `%dimension_phrase%` – „in der Oberwelt | im Nether | im End“
+- `%time%` / `%until%` – formatiert gemäß `dateTimeFormat`
+- `%remaining%` – verbleibende Dauer (z. B. `1d2h`)
+- `%timestamp%` – Unix‑Zeitstempel (für Discord `<t:%timestamp%>`)
+- `%totesgrund%` – humorvoller Grund abhängig von der Todesursache (inkl. DiscordSRV‑Mention)
 
-### Befehle
-- `/deathban reload` – Konfiguration neu laden
-- `/deathban unban <spieler>` – Spieler entbannen
-- `/deathban remaining <spieler>` – Restzeit anzeigen
-- `/deathban list` – Aktive DeathBans auflisten
-- `/deathban listmods` – Aktive Moderator-Sperren auflisten
-- `/deathban modunban <spieler>` – Moderator-Spectator-Sperre aufheben
+**PlaceholderAPI‑Expansion** (`deathban`):
+- `%deathban_players%` – Anzahl aktiver DeathBans
+- `%deathban_mods%` – Anzahl aktiver Moderator/Streamer‑Spectates
+- `%deathban_total%` – Summe aus beidem
 
-### Berechtigungen
-- `deathban.admin` – Zugriff auf Admin-Befehle (default: op)
-- `deathban.exempt` – Spieler ist vom DeathBan ausgenommen
-- `deathban.moderator` – Moderator-Spectator-Flow statt Ban
+## Befehle & Rechte
+- `/deathban` – ohne Rechte: kurze Plugin‑Info; mit Rechten: Hilfe
+- `/deathban reload` – Konfiguration neu laden (`deathban.admin`)
+- `/deathban unban <spieler>` – Spieler entbannen; meldet Fehler, wenn nicht gebannt (`deathban.admin`)
+- `/deathban remaining <spieler>` – Restzeit & Ende anzeigen (`deathban.admin`)
+- `/deathban list` – aktive DeathBans auflisten (`deathban.admin`)
+- `/deathban listmods` – aktive Moderator/Streamer‑Sperren auflisten (`deathban.admin`)
+- `/deathban modunban <spieler>` – Mod/Streamer freigeben; online: sofort Teleport+SURVIVAL, offline: beim nächsten Join (`deathban.admin`)
 
-### Build
-- Windows: `build.bat` im Projekt ausführen (Gradle-Wrapper wird automatisch erzeugt, Artefakt wird nach `plugins/NilsANG-DeathBan.jar` kopiert).
-- Alternativ: `gradlew clean shadowJar` und JAR aus `build/libs/` manuell nach `plugins/` kopieren.
+**Permissions**
+- `deathban.admin` – Admin‑Befehle erlauben
+- `deathban.moderator` – Moderator‑Flow (Spectator statt Ban)
+- `deathban.streamer` – Moderator‑Flow + einmaliger Kick nach Tod
+- `deathban.exempt` – komplett von DeathBan ausgenommen
 
-### Hinweise
-- **Kompatibilität**: Purpur/Paper 1.21.10+, Java 21.
-- **Optional**: DiscordSRV (Mentions), PlaceholderAPI (weitere Placeholder), LuckPerms (Permissions-Management).
+## Hinweise
+- `mod_spectate.yml`/`bans.yml` werden automatisch bereinigt, wenn Sperren ablaufen.
+- GameMode‑Wechsel von aktiven Mods/Streamern wird bis zum Ablauf blockiert (Schutz vor „Rauscheaten“).
 
-### Lizenz
-MIT (oder anpassen, je nach Repository-Richtlinie).
+---
+Fragen/Ideen? Pull Requests & Issues sind willkommen! 😊

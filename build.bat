@@ -32,7 +32,7 @@ if errorlevel 1 (
 	exit /b 1
 )
 
-set OUT=build\libs\DeathBan-0.1.0-SNAPSHOT.jar
+set OUT=build\libs\DeathBan-1.0.0.jar
 if not exist "%OUT%" (
 	echo Fehler: Artefakt nicht gefunden: %OUT%
 	dir build\libs

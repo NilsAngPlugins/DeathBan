@@ -3,8 +3,8 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "dev.nilsang"
-version = "0.1.0-SNAPSHOT"
+group = "de.t0g3pii"
+version = "1.0.0"
 
 repositories {
     mavenCentral()

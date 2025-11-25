@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.listener;
+package de.t0g3pii.deathban.listener;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 
-import dev.t0g3pii.deathban.store.ModSpectateStore;
+import de.t0g3pii.deathban.store.ModSpectateStore;
 
 public class GameModeGuardListener implements Listener {
 	private final ModSpectateStore store;

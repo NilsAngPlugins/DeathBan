@@ -1,13 +1,13 @@
-package dev.t0g3pii.deathban.papi;
+package de.t0g3pii.deathban.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import dev.t0g3pii.deathban.NilsAngDeathBanPlugin;
-import dev.t0g3pii.deathban.store.BanRecord;
-import dev.t0g3pii.deathban.store.ModSpectateRecord;
+import de.t0g3pii.deathban.NilsAngDeathBanPlugin;
+import de.t0g3pii.deathban.store.BanRecord;
+import de.t0g3pii.deathban.store.ModSpectateRecord;
 
 import java.util.Map;
 import java.util.UUID;
@@ -22,9 +22,11 @@ public class DeathBanExpansion extends PlaceholderExpansion {
 	@Override
 	public @NotNull String getIdentifier() { return "deathban"; }
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public @NotNull String getAuthor() { return "NilsANG"; }
+	public @NotNull String getAuthor() { return plugin.getDescription().getAuthors().get(0); }
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public @NotNull String getVersion() { return plugin.getDescription().getVersion(); }
 

@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.command;
+package de.t0g3pii.deathban.command;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -6,22 +6,25 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import dev.t0g3pii.deathban.NilsAngDeathBanPlugin;
-import dev.t0g3pii.deathban.core.DeathBanService;
-import dev.t0g3pii.deathban.store.BanRecord;
-import dev.t0g3pii.deathban.store.ModSpectateRecord;
+import de.t0g3pii.deathban.NilsAngDeathBanPlugin;
+import de.t0g3pii.deathban.core.DeathBanService;
+import de.t0g3pii.deathban.store.BanRecord;
+import de.t0g3pii.deathban.store.ModSpectateRecord;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class DeathBanCommand implements CommandExecutor {
+public class DeathBanCommand implements CommandExecutor, TabCompleter {
 	private final NilsAngDeathBanPlugin plugin;
 
 	public DeathBanCommand(NilsAngDeathBanPlugin plugin) {
@@ -34,9 +37,15 @@ public class DeathBanCommand implements CommandExecutor {
 		MiniMessage mm = service.mm();
 		String px = service.getPrefix();
 
-		if (!(sender.hasPermission("deathban.admin"))) {
-			sender.sendMessage(mm.deserialize(px + " <red>Du hast keine Berechtigung.</red>"));
-			return true;
+		boolean hasAdmin = sender.hasPermission("deathban.admin");
+		if (!hasAdmin) {
+			if (args.length == 0) {
+				sendInfo(sender, mm, px);
+				return true;
+			} else {
+				sender.sendMessage(mm.deserialize(px + " <red>Keine Berechtigung.</red>"));
+				return true;
+			}
 		}
 
 		if (args.length == 0) {
@@ -54,8 +63,13 @@ public class DeathBanCommand implements CommandExecutor {
 			case "unban":
 				if (args.length < 2) { sendUsage(sender, mm, px, label); return true; }
 				OfflinePlayer op = Bukkit.getOfflinePlayer(args[1]);
-				service.unban(op.getUniqueId());
-				sender.sendMessage(mm.deserialize(px + " <green>Spieler <white>" + (op.getName()==null?op.getUniqueId():op.getName()) + "</white> wurde entbannt.</green>"));
+				UUID uid = op.getUniqueId();
+				if (!service.isBanned(uid)) {
+					sender.sendMessage(mm.deserialize(px + " <red>" + (op.getName()==null?uid:op.getName()) + " ist nicht tot/gebanned.</red>"));
+					return true;
+				}
+				service.unban(uid);
+				sender.sendMessage(mm.deserialize(px + " <green>Spieler <white>" + (op.getName()==null?uid:op.getName()) + "</white> wurde entbannt.</green>"));
 				return true;
 
 			case "remaining":
@@ -118,13 +132,27 @@ public class DeathBanCommand implements CommandExecutor {
 			case "modunban":
 				if (args.length < 2) { sendUsage(sender, mm, px, label); return true; }
 				OfflinePlayer mop = Bukkit.getOfflinePlayer(args[1]);
-				plugin.getModSpectateStore().remove(mop.getUniqueId());
-				plugin.getModSpectateStore().save();
-				Player online = mop.getPlayer();
-				if (online != null && online.isOnline()) {
-					online.setGameMode(org.bukkit.GameMode.SURVIVAL);
+				UUID mid = mop.getUniqueId();
+				Optional<ModSpectateRecord> recOpt = plugin.getModSpectateStore().getRecord(mid);
+				if (recOpt.isEmpty()) {
+					sender.sendMessage(mm.deserialize(px + " <red>" + (mop.getName()==null?mid:mop.getName()) + " ist nicht tot (Moderator/Streamer).</red>"));
+					return true;
 				}
-				sender.sendMessage(mm.deserialize(px + " <green>Moderator <white>" + (mop.getName()==null?mop.getUniqueId():mop.getName()) + "</white> wurde wiederbelebt.</green>"));
+				if (mop.isOnline()) {
+					Player online = mop.getPlayer();
+					plugin.getModSpectateStore().remove(mid);
+					plugin.getModSpectateStore().save();
+					Location safe = computeSafeRespawn(online);
+					online.teleport(safe);
+					online.setGameMode(GameMode.SURVIVAL);
+					sender.sendMessage(mm.deserialize(px + " <green>Moderator <white>" + online.getName() + "</white> wurde wiederbelebt.</green>"));
+				} else {
+					ModSpectateRecord r = recOpt.get();
+					ModSpectateRecord updated = new ModSpectateRecord(Instant.now().getEpochSecond() - 1, r.playerName, r.worldKey, r.x, r.y, r.z, r.deathEpochSeconds);
+					plugin.getModSpectateStore().putRecord(mid, updated);
+					plugin.getModSpectateStore().save();
+					sender.sendMessage(mm.deserialize(px + " <green>Moderator <white>" + (mop.getName()==null?mid:mop.getName()) + "</white> wird beim nächsten Join wiederbelebt.</green>"));
+				}
 				return true;
 
 			default:
@@ -133,8 +161,66 @@ public class DeathBanCommand implements CommandExecutor {
 		}
 	}
 
+	private void sendInfo(CommandSender sender, MiniMessage mm, String px) {
+		@SuppressWarnings("deprecation")
+		String version = plugin.getDescription().getVersion();
+		@SuppressWarnings("deprecation")
+		String authors = String.join(", ", plugin.getDescription().getAuthors());
+		sender.sendMessage(mm.deserialize(px + " <gray>v" + version + "</gray>"));
+		sender.sendMessage(mm.deserialize("<gray>Autor(en):</gray> <white>" + authors + "</white>"));
+		sender.sendMessage(mm.deserialize("<gray>Funktionen:</gray> <white>DeathBan ist ein Plugin das Spieler nach dem Tod für eine konfigurierbare Dauer bannt.</white>"));
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		if (!sender.hasPermission("deathban.admin")) return Collections.emptyList();
+		if (args.length == 1) {
+			List<String> subs = Arrays.asList("reload","unban","remaining","list","listmods","modunban");
+			String p = args[0].toLowerCase();
+			return subs.stream().filter(s -> s.startsWith(p)).collect(Collectors.toList());
+		}
+		if (args.length == 2) {
+			String sub = args[0].toLowerCase();
+			if (sub.equals("unban") || sub.equals("remaining")) {
+				Map<UUID, BanRecord> all = plugin.getStore().listAll();
+				return toNames(all.keySet(), args[1]);
+			}
+			if (sub.equals("modunban")) {
+				Map<UUID, ModSpectateRecord> mods = plugin.getModSpectateStore().all();
+				return toNames(mods.keySet(), args[1]);
+			}
+		}
+		return Collections.emptyList();
+	}
+
+	private List<String> toNames(Set<UUID> ids, String prefix) {
+		String p = prefix == null ? "" : prefix.toLowerCase();
+		List<String> names = new ArrayList<>();
+		for (UUID id : ids) {
+			OfflinePlayer op = Bukkit.getOfflinePlayer(id);
+			String name = op != null && op.getName() != null ? op.getName() : id.toString();
+			if (name.toLowerCase().startsWith(p)) names.add(name);
+		}
+		return names;
+	}
+
+	private Location computeSafeRespawn(Player p) {
+		@SuppressWarnings("deprecation")
+		Location base = p.getBedSpawnLocation();
+		if (base == null) {
+			World defaultWorld = Bukkit.getWorlds().isEmpty() ? p.getWorld() : Bukkit.getWorlds().get(0);
+			base = defaultWorld.getSpawnLocation();
+		}
+		Location safe = base.clone();
+		int highestY = safe.getWorld().getHighestBlockAt(safe).getY();
+		safe.setY(highestY + 1.0);
+		safe.setX(safe.getBlockX() + 0.5);
+		safe.setZ(safe.getBlockZ() + 0.5);
+		return safe;
+	}
+
 	private void sendUsage(CommandSender sender, MiniMessage mm, String px, String label) {
-		sender.sendMessage(mm.deserialize(px + " <#9483ff>DeathBan Befehle</#9483ff>"));
+		sender.sendMessage(mm.deserialize(px + " <#9483ff>Befehle</#9483ff>"));
 		sender.sendMessage(mm.deserialize("<gray>\u2022</gray> <white>/" + label + " reload</white> <dark_gray>-</dark_gray> <gray>Konfiguration neu laden</gray>"));
 		sender.sendMessage(mm.deserialize("<gray>\u2022</gray> <white>/" + label + " unban <spieler></white> <dark_gray>-</dark_gray> <gray>Spieler entbannen</gray>"));
 		sender.sendMessage(mm.deserialize("<gray>\u2022</gray> <white>/" + label + " remaining <spieler></white> <dark_gray>-</dark_gray> <gray>Restzeit anzeigen</gray>"));

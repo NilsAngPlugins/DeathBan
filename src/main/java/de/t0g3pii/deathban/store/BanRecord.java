@@ -1,15 +1,15 @@
-package dev.t0g3pii.deathban.store;
+package de.t0g3pii.deathban.store;
 
-public class ModSpectateRecord {
+public class BanRecord {
 	public final long untilEpochSeconds;
 	public final String playerName;
-	public final String worldKey;
+	public final String worldKey; // normal, nether, the_end
 	public final int x;
 	public final int y;
 	public final int z;
 	public final long deathEpochSeconds;
 
-	public ModSpectateRecord(long untilEpochSeconds, String playerName, String worldKey, int x, int y, int z, long deathEpochSeconds) {
+	public BanRecord(long untilEpochSeconds, String playerName, String worldKey, int x, int y, int z, long deathEpochSeconds) {
 		this.untilEpochSeconds = untilEpochSeconds;
 		this.playerName = playerName;
 		this.worldKey = worldKey;

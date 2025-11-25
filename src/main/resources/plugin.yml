@@ -1,5 +1,7 @@
 name: DeathBan
 version: ${version}
+description: DeathBan is a plugin that bans players after they die for a configurable duration.
+url: https://github.com/t0g3pii/DeathBan
 main: dev.t0g3pii.deathban.NilsAngDeathBanPlugin
 api-version: '1.21'
 authors: ["t0g3pii"]

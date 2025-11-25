@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.discord;
+package de.t0g3pii.deathban.discord;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -25,6 +25,7 @@ public class DiscordNotifier {
 		String url = discordCfg.getString("webhookUrl", "");
 		if (url == null || url.isBlank()) return;
 		try {
+			@SuppressWarnings("deprecation")
 			URL u = new URL(url);
 			HttpsURLConnection conn = (HttpsURLConnection) u.openConnection();
 			conn.setRequestMethod("POST");

@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.listener;
+package de.t0g3pii.deathban.listener;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -9,12 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
-
-import dev.t0g3pii.deathban.core.DeathBanService;
-import dev.t0g3pii.deathban.store.ModSpectateRecord;
-import dev.t0g3pii.deathban.store.ModSpectateStore;
-
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.Plugin;
+
+import de.t0g3pii.deathban.core.DeathBanService;
+import de.t0g3pii.deathban.store.ModSpectateRecord;
+import de.t0g3pii.deathban.store.ModSpectateStore;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -26,11 +26,13 @@ public class JoinListener implements Listener {
 	private final DeathBanService service;
 	private final org.bukkit.configuration.file.FileConfiguration config;
 	private final ModSpectateStore modStore;
+	private final Plugin plugin;
 
-	public JoinListener(DeathBanService service, org.bukkit.configuration.file.FileConfiguration config, ModSpectateStore modStore) {
+	public JoinListener(DeathBanService service, org.bukkit.configuration.file.FileConfiguration config, ModSpectateStore modStore, Plugin plugin) {
 		this.service = service;
 		this.config = config;
 		this.modStore = modStore;
+		this.plugin = plugin;
 	}
 
 	@EventHandler
@@ -52,6 +54,7 @@ public class JoinListener implements Listener {
 		event.disallow(PlayerLoginEvent.Result.KICK_OTHER, mm.deserialize(service.getPrefix() + " " + msg));
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
 		Player p = event.getPlayer();
@@ -64,14 +67,14 @@ public class JoinListener implements Listener {
 		MiniMessage mm = service.mm();
 		if (until > now) {
 			String untilFormatted = dtf.format(Instant.ofEpochSecond(until));
-			Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("NilsANG-DeathBan"), () -> {
+			Bukkit.getScheduler().runTask(plugin, () -> {
 				p.setGameMode(GameMode.SPECTATOR);
 				String msg = config.getString("moderator.enterMessage", "<yellow>Du bist im Zuschauermodus bis %until%.")
 						.replace("%until%", untilFormatted);
 				p.sendMessage(mm.deserialize(service.getPrefix() + " " + msg));
 			});
 		} else {
-			Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("NilsANG-DeathBan"), () -> {
+			Bukkit.getScheduler().runTask(plugin, () -> {
 				Location base = p.getBedSpawnLocation();
 				if (base == null) {
 					World defaultWorld = Bukkit.getWorlds().isEmpty() ? p.getWorld() : Bukkit.getWorlds().get(0);

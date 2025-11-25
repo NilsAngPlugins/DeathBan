@@ -1,12 +1,12 @@
-package dev.t0g3pii.deathban.core;
+package de.t0g3pii.deathban.core;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import dev.t0g3pii.deathban.store.BanRecord;
-import dev.t0g3pii.deathban.store.BanStore;
-import dev.t0g3pii.deathban.util.DurationParser;
+import de.t0g3pii.deathban.store.BanRecord;
+import de.t0g3pii.deathban.store.BanStore;
+import de.t0g3pii.deathban.util.DurationParser;
 
 import java.time.Duration;
 import java.time.Instant;

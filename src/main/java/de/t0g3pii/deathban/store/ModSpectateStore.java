@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.store;
+package de.t0g3pii.deathban.store;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

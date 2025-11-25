@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban.listener;
+package de.t0g3pii.deathban.listener;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -10,12 +10,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.plugin.Plugin;
 
-import dev.t0g3pii.deathban.core.DeathBanService;
-import dev.t0g3pii.deathban.discord.DiscordNotifier;
-import dev.t0g3pii.deathban.store.ModSpectateRecord;
-import dev.t0g3pii.deathban.store.ModSpectateStore;
-import dev.t0g3pii.deathban.util.DiscordLinkUtil;
+import de.t0g3pii.deathban.core.DeathBanService;
+import de.t0g3pii.deathban.discord.DiscordNotifier;
+import de.t0g3pii.deathban.store.ModSpectateRecord;
+import de.t0g3pii.deathban.store.ModSpectateStore;
+import de.t0g3pii.deathban.util.DiscordLinkUtil;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -31,13 +32,15 @@ public class DeathListener implements Listener {
 	private final FileConfiguration discordCfg;
 	private final DiscordNotifier discord;
 	private final ModSpectateStore modStore;
+	private final Plugin plugin;
 
-	public DeathListener(DeathBanService service, FileConfiguration config, FileConfiguration discordCfg, DiscordNotifier discord, ModSpectateStore modStore) {
+	public DeathListener(DeathBanService service, FileConfiguration config, FileConfiguration discordCfg, DiscordNotifier discord, ModSpectateStore modStore, Plugin plugin) {
 		this.service = service;
 		this.config = config;
 		this.discordCfg = discordCfg;
 		this.discord = discord;
 		this.modStore = modStore;
+		this.plugin = plugin;
 	}
 
 	@EventHandler
@@ -58,13 +61,13 @@ public class DeathListener implements Listener {
 		String funnyReason = buildFunnyReason(event);
 
 		if (moderatorMode) {
-			long until = now + dev.t0g3pii.deathban.util.DurationParser.parseOrThrow(config.getString("banDuration", "24h")).toSeconds();
+			long until = now + de.t0g3pii.deathban.util.DurationParser.parseOrThrow(config.getString("banDuration", "24h")).toSeconds();
 			ModSpectateRecord rec = new ModSpectateRecord(until, p.getName(), service.worldKey(p.getWorld()), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), now);
 			modStore.putRecord(p.getUniqueId(), rec);
 			modStore.save();
 			String untilFormatted = dtf.format(Instant.ofEpochSecond(until));
 			MiniMessage mm = service.mm();
-			Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("NilsANG-DeathBan"), () -> {
+			Bukkit.getScheduler().runTask(plugin, () -> {
 				p.setGameMode(GameMode.SPECTATOR);
 				String msg = config.getString("moderator.enterMessage", "<yellow>Du bist im Zuschauermodus bis %until%.")
 						.replace("%until%", untilFormatted);
@@ -128,7 +131,7 @@ public class DeathListener implements Listener {
 				.replace("%duration%", humanDuration(remaining));
 		MiniMessage mm = service.mm();
 
-		Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("NilsANG-DeathBan"), () -> {
+		Bukkit.getScheduler().runTask(plugin, () -> {
 			p.kick(mm.deserialize(service.getPrefix() + " " + banMessage));
 		});
 

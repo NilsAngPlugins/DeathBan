@@ -1,4 +1,4 @@
-package dev.t0g3pii.deathban;
+package de.t0g3pii.deathban;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -9,16 +9,16 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import dev.t0g3pii.deathban.command.DeathBanCommand;
-import dev.t0g3pii.deathban.core.DeathBanService;
-import dev.t0g3pii.deathban.discord.DiscordNotifier;
-import dev.t0g3pii.deathban.listener.DeathListener;
-import dev.t0g3pii.deathban.listener.GameModeGuardListener;
-import dev.t0g3pii.deathban.listener.JoinListener;
-import dev.t0g3pii.deathban.papi.DeathBanExpansion;
-import dev.t0g3pii.deathban.store.BanStore;
-import dev.t0g3pii.deathban.store.ModSpectateRecord;
-import dev.t0g3pii.deathban.store.ModSpectateStore;
+import de.t0g3pii.deathban.command.DeathBanCommand;
+import de.t0g3pii.deathban.core.DeathBanService;
+import de.t0g3pii.deathban.discord.DiscordNotifier;
+import de.t0g3pii.deathban.listener.DeathListener;
+import de.t0g3pii.deathban.listener.GameModeGuardListener;
+import de.t0g3pii.deathban.listener.JoinListener;
+import de.t0g3pii.deathban.papi.DeathBanExpansion;
+import de.t0g3pii.deathban.store.BanStore;
+import de.t0g3pii.deathban.store.ModSpectateRecord;
+import de.t0g3pii.deathban.store.ModSpectateStore;
 
 import java.io.File;
 import java.time.Instant;
@@ -36,10 +36,11 @@ public final class NilsAngDeathBanPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		saveDefaultConfig();
-		if (getResource("discord.yml") != null) {
+		File discordFile = new File(getDataFolder(), "discord.yml");
+		if (!discordFile.exists()) {
 			saveResource("discord.yml", false);
 		}
-		this.discordCfg = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "discord.yml"));
+		this.discordCfg = YamlConfiguration.loadConfiguration(discordFile);
 
 		this.store = new BanStore(getDataFolder());
 		this.store.load();
@@ -50,10 +51,12 @@ public final class NilsAngDeathBanPlugin extends JavaPlugin {
 		this.service = new DeathBanService(store, getConfig());
 		this.discord = new DiscordNotifier(discordCfg);
 
-		getServer().getPluginManager().registerEvents(new DeathListener(service, getConfig(), discordCfg, discord, modSpectateStore), this);
-		getServer().getPluginManager().registerEvents(new JoinListener(service, getConfig(), modSpectateStore), this);
+		getServer().getPluginManager().registerEvents(new DeathListener(service, getConfig(), discordCfg, discord, modSpectateStore, this), this);
+		getServer().getPluginManager().registerEvents(new JoinListener(service, getConfig(), modSpectateStore, this), this);
 		getServer().getPluginManager().registerEvents(new GameModeGuardListener(modSpectateStore, service.getPrefix()), this);
-		getCommand("deathban").setExecutor(new DeathBanCommand(this));
+		DeathBanCommand cmd = new DeathBanCommand(this);
+		getCommand("deathban").setExecutor(cmd);
+		getCommand("deathban").setTabCompleter(cmd);
 
 		if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
 			new DeathBanExpansion(this).register();
@@ -61,7 +64,7 @@ public final class NilsAngDeathBanPlugin extends JavaPlugin {
 
 		startModeratorRestoreTask();
 
-		getLogger().info("NilsANG-DeathBan aktiviert.");
+		getLogger().info("DeathBan aktiviert.");
 	}
 
 	@Override
@@ -114,6 +117,7 @@ public final class NilsAngDeathBanPlugin extends JavaPlugin {
 	}
 
 	private Location computeSafeRespawn(Player p) {
+		@SuppressWarnings("deprecation")
 		Location base = p.getBedSpawnLocation();
 		if (base == null) {
 			World defaultWorld = Bukkit.getWorlds().isEmpty() ? p.getWorld() : Bukkit.getWorlds().get(0);
