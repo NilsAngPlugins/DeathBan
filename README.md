@@ -1,5 +1,6 @@
 # DeathBan (Purpur/Paper 1.21.10+, Java 21)
-
+![banner-1280x640](https://github.com/user-attachments/assets/ca08173c-7636-4f0f-baa0-327a0e07b6c1)
+ 
 Leichtgewichtiges, produktiv erprobtes DeathBan-Plugin für Purpur/Paper-Server. Nach dem Tod wird ein Spieler für eine konfigurierbare Dauer gebannt und (optional) ein schönes Discord‑Embed verschickt. Moderatoren/Streamer werden nicht dauerhaft gebannt, sondern in den Zuschauermodus versetzt – mit sicherem Rückteleport zum Spawn nach Ablauf.
 
 ## Features
