@@ -44,12 +44,4 @@ jobs:
         name: 'DeathBan-dev-build' # optional, default is artifact
         # A file, directory or wildcard pattern that describes what to upload
         path: '/home/runner/work/DeathBan/DeathBan/build/libs/DeathBan-1.0.0.jar'
-        
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        # Artifact name
-        name: 'DeathBan-dev-build2' # optional, default is artifact
-        # A file, directory or wildcard pattern that describes what to upload
-        path: '/home/runner/work/DeathBan/DeathBan/build/libs/DeathBan-1.0.0.jar'        
           
