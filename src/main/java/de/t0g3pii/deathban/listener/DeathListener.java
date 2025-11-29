@@ -60,6 +60,7 @@ public class DeathListener implements Listener {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern(datePattern).withZone(ZoneId.systemDefault());
 		String dimensionPhrase = service.formatDimensionPhrase(p.getWorld());
 		String funnyReason = buildFunnyReason(event);
+		String timeFormatted = dtf.format(Instant.ofEpochSecond(now));
 
 		if (moderatorMode) {
 			long until = now + de.t0g3pii.deathban.util.DurationParser.parseOrThrow(config.getString("banDuration", "24h")).toSeconds();
@@ -67,6 +68,8 @@ public class DeathListener implements Listener {
 			modStore.putRecord(p.getUniqueId(), rec);
 			modStore.save();
 			String untilFormatted = dtf.format(Instant.ofEpochSecond(until));
+			long remaining = Math.max(0, until - now);
+			String durationStr = humanDuration(remaining);
 			MiniMessage mm = service.mm();
 			Bukkit.getScheduler().runTask(plugin, () -> {
 				p.setGameMode(GameMode.SPECTATOR);
@@ -75,7 +78,15 @@ public class DeathListener implements Listener {
 				p.sendMessage(mm.deserialize(service.getPrefix() + " " + msg));
 				if (streamerMode) {
 					String kickMsg = config.getString("moderator.streamerKickMessage", "<gray>Stream-Übergang. Du wurdest kurz getrennt.</gray>")
-							.replace("%until%", untilFormatted);
+						.replace("%spielername%", p.getName())
+						.replace("%X%", String.valueOf(loc.getBlockX()))
+						.replace("%Y%", String.valueOf(loc.getBlockY()))
+						.replace("%Z%", String.valueOf(loc.getBlockZ()))
+						.replace("%dimension_phrase%", dimensionPhrase)
+						.replace("%time%", timeFormatted)
+						.replace("%until%", untilFormatted)
+						.replace("%duration%", durationStr)
+						.replace("%todesgrund%", funnyReason);
 					p.kick(mm.deserialize(service.getPrefix() + " " + kickMsg));
 				}
 			});
@@ -118,7 +129,6 @@ public class DeathListener implements Listener {
 		long until = service.banPlayerNow(p.getUniqueId(), p.getName(), p.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 		long remaining = until - now;
 
-		String timeFormatted = dtf.format(Instant.ofEpochSecond(now));
 		String untilFormatted = dtf.format(Instant.ofEpochSecond(until));
 
 		String banMessage = config.getString("banMessage", "<red>Gebannt</red>")
