@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 public class DeathListener implements Listener {
 	private final DeathBanService service;
@@ -194,21 +195,43 @@ public class DeathListener implements Listener {
 			return who + " wurde von " + killerName + " vernascht.";
 		}
 		if (last == null) return who + " hat sehr unglücklich geatmet.";
-		switch (last.getCause()) {
-			case FALL: return who + " wollte fliegen lernen.";
-			case DROWNING: return who + " hat zu lange die Luft angehalten.";
-			case LAVA: return who + " dachte, Lava sei ein Thermalbad.";
-			case FIRE: case FIRE_TICK: return who + " hat mit dem Feuer gespielt.";
-			case VOID: return who + " ist vom Rand der Welt gefallen.";
-			case STARVATION: return who + " hat die Lunchbox vergessen.";
-			case POISON: return who + " hat fragwürdige Pilze probiert.";
-			case CONTACT: return who + " hat die Umarmung der Kakteen unterschätzt.";
-			case SUFFOCATION: return who + " wurde von Blöcken erdrückt.";
-			case BLOCK_EXPLOSION: case ENTITY_EXPLOSION: return who + " hat zu nah an der Party gefeiert.";
-			case MAGIC: return who + " hat magische Nebenwirkungen erfahren.";
-			case WITHER: return who + " hat den Wither unterschätzt.";
-			case CRAMMING: return who + " stand etwas zu eng.";
-			default: return who + " ist einen mysteriösen Tod gestorben.";
+		String cause = last.getCause().name();
+		switch (cause) {
+			case "FALL": return who + " wollte fliegen lernen.";
+			case "DROWNING": return who + " hat zu lange die Luft angehalten.";
+			case "LAVA": return who + " dachte, Lava sei ein Thermalbad.";
+			case "FIRE":
+			case "FIRE_TICK": return who + " hat mit dem Feuer gespielt.";
+			case "VOID": return who + " ist vom Rand der Welt gefallen.";
+			case "STARVATION": return who + " hat die Lunchbox vergessen.";
+			case "POISON": return who + " hat fragwürdige Pilze probiert.";
+			case "CONTACT": return who + " hat die Umarmung der Kakteen unterschätzt.";
+			case "SUFFOCATION": return who + " wurde von Blöcken erdrückt.";
+			case "BLOCK_EXPLOSION":
+			case "ENTITY_EXPLOSION": return who + " hat zu nah an der Party gefeiert.";
+			case "MAGIC": return who + " hat magische Nebenwirkungen erfahren.";
+			case "WITHER": return who + " hat den Wither unterschätzt.";
+			case "CRAMMING": return who + " stand etwas zu eng.";
+			case "PROJECTILE": return who + " hat ein fliegendes Geschenk gefangen.";
+			case "ENTITY_ATTACK": return who + " hat eine ungesunde Umarmung kassiert.";
+			case "ENTITY_SWEEP_ATTACK": return who + " ist in einen Schwung geraten.";
+			case "FALLING_BLOCK": return who + " wurde von der Schwerkraft erschlagen.";
+			case "LIGHTNING": return who + " hat kostenloses Solarladen ausprobiert.";
+			case "HOT_FLOOR": return who + " hat den Boden aus Lava zu wörtlich genommen.";
+			case "FLY_INTO_WALL": return who + " hat die Elytra ohne TÜV geflogen.";
+			case "FREEZE": return who + " hat den Winter unterschätzt.";
+			case "DRAGON_BREATH": return who + " hat zu nah am Drachen geatmet.";
+			case "FIREWORK": return who + " ist mit Raketen wirklich durchgestartet.";
+			case "THORNS": return who + " hat sich an Dornen die Meinung geholt.";
+			case "SONIC_BOOM": return who + " hat den Warden zu laut geweckt.";
+			case "MELTING": return who + " ist einfach dahingeschmolzen.";
+			case "DRYOUT": return who + " ist an akuter Trockenheit verendet.";
+			case "WORLD_BORDER": return who + " hat am Rand der Welt zu sehr gedrängelt.";
+			case "SUICIDE":
+			case "KILL": return who + " hat dem Leben freiwillig den Rücken gekehrt.";
+			case "CUSTOM": return who + " wurde auf mysteriöse Weise aus dem Leben gerissen.";
+			default:
+				return who + " starb an " + cause.toLowerCase(Locale.ROOT).replace('_', ' ') + ".";
 		}
 	}
 
