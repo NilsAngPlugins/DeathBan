@@ -75,22 +75,48 @@ public class DeathBanCommand implements CommandExecutor, TabCompleter {
 			case "remaining":
 				if (args.length < 2) { sendUsage(sender, mm, px, label); return true; }
 				OfflinePlayer op2 = Bukkit.getOfflinePlayer(args[1]);
-				OptionalLong rem = service.getRemainingSeconds(op2.getUniqueId());
-				if (rem.isEmpty()) {
-					sender.sendMessage(mm.deserialize(px + " <gray>" + (op2.getName()==null?op2.getUniqueId():op2.getName()) + "</gray> <green>ist nicht gebannt.</green>"));
-					return true;
-				}
-				long now = Instant.now().getEpochSecond();
-				long until = now + rem.getAsLong();
+				UUID rid = op2.getUniqueId();
+				OptionalLong rem = service.getRemainingSeconds(rid);
+				Long remainingSeconds = null; // boxed for null = unknown/not dead
+				String extra = "";
+				String untilFormatted;
 				String datePattern = plugin.getConfig().getString("dateTimeFormat", "dd.MM.yyyy HH:mm:ss");
 				DateTimeFormatter dtf = DateTimeFormatter.ofPattern(datePattern).withZone(ZoneId.systemDefault());
-				String untilFormatted = dtf.format(Instant.ofEpochSecond(until));
-				Optional<BanRecord> rec = service.getRecord(op2.getUniqueId());
-				String extra = rec.map(r -> {
-					String world = r.worldKey != null ? r.worldKey : "?";
-					return " <dark_gray>|</dark_gray> <gray>Welt:</gray> <white>" + world + "</white> <dark_gray>|</dark_gray> <gray>XYZ:</gray> <white>" + r.x + ", " + r.y + ", " + r.z + "</white>";
-				}).orElse("");
-				sender.sendMessage(mm.deserialize(px + " <gold>Verbleibend:</gold> <yellow>" + humanDuration(rem.getAsLong()) + "</yellow> <dark_gray>|</dark_gray> <gray>Ende:</gray> <white>" + untilFormatted + "</white>" + extra));
+
+				if (rem.isPresent()) {
+					long now = Instant.now().getEpochSecond();
+					long until = now + rem.getAsLong();
+					remainingSeconds = rem.getAsLong();
+					untilFormatted = dtf.format(Instant.ofEpochSecond(until));
+					Optional<BanRecord> rOpt = service.getRecord(rid);
+					extra = rOpt.map(r -> {
+						String world = r.worldKey != null ? r.worldKey : "?";
+						return " <dark_gray>|</dark_gray> <gray>Welt:</gray> <white>" + world + "</white> <dark_gray>|</dark_gray> <gray>XYZ:</gray> <white>" + r.x + ", " + r.y + ", " + r.z + "</white>";
+					}).orElse("");
+					sender.sendMessage(mm.deserialize(px + " <gold>Verbleibend:</gold> <yellow>" + humanDuration(remainingSeconds) + "</yellow> <dark_gray>|</dark_gray> <gray>Ende:</gray> <white>" + untilFormatted + "</white>" + extra));
+					return true;
+				}
+
+				// Fallback: Prüfe aktive Mod/Streamer-Sperre
+				OptionalLong modUntilOpt = plugin.getModSpectateStore().getUntil(rid);
+				if (modUntilOpt.isPresent()) {
+					long now = Instant.now().getEpochSecond();
+					long until = modUntilOpt.getAsLong();
+					if (until > now) {
+						remainingSeconds = until - now;
+						untilFormatted = dtf.format(Instant.ofEpochSecond(until));
+						Optional<ModSpectateRecord> mrec = plugin.getModSpectateStore().getRecord(rid);
+						if (mrec.isPresent()) {
+							ModSpectateRecord r = mrec.get();
+							String world = r.worldKey != null ? r.worldKey : "?";
+							extra = " <dark_gray>|</dark_gray> <gray>Welt:</gray> <white>" + world + "</white> <dark_gray>|</dark_gray> <gray>XYZ:</gray> <white>" + r.x + ", " + r.y + ", " + r.z + "</white>";
+						}
+						sender.sendMessage(mm.deserialize(px + " <gold>Verbleibend:</gold> <yellow>" + humanDuration(remainingSeconds) + "</yellow> <dark_gray>|</dark_gray> <gray>Ende:</gray> <white>" + untilFormatted + "</white>" + extra));
+						return true;
+					}
+				}
+
+				sender.sendMessage(mm.deserialize(px + " <gray>" + (op2.getName()==null?rid:op2.getName()) + "</gray> <green>ist nicht gebannt.</green>"));
 				return true;
 
 			case "list":
