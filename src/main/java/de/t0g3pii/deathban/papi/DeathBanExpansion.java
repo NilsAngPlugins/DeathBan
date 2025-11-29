@@ -1,6 +1,7 @@
 package de.t0g3pii.deathban.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,28 @@ public class DeathBanExpansion extends PlaceholderExpansion {
 	@Override
 	public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
 		String key = params.toLowerCase();
+
+		// dynamic checks first
+		if (key.equals("isdead")) {
+			if (player == null) return "false";
+			UUID id = player.getUniqueId();
+			boolean dead = plugin.getStore().isBanned(id) || plugin.getModSpectateStore().isActive(id);
+			return String.valueOf(dead);
+		}
+		if (key.startsWith("isdead_")) {
+			String name = params.substring("isdead_".length());
+			if (name.isEmpty()) return "false";
+			OfflinePlayer target = Bukkit.getPlayerExact(name);
+			if (target == null) {
+				// fall back to offline lookup
+				target = Bukkit.getOfflinePlayer(name);
+			}
+			if (target == null || (target.getUniqueId() == null)) return "false";
+			UUID id = target.getUniqueId();
+			boolean dead = plugin.getStore().isBanned(id) || plugin.getModSpectateStore().isActive(id);
+			return String.valueOf(dead);
+		}
+
 		switch (key) {
 			case "players":
 				Map<UUID, BanRecord> all = plugin.getStore().listAll();
