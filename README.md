@@ -10,7 +10,7 @@ Leichtgewichtiges, produktiv erprobtes DeathBan-Plugin für Purpur/Paper-Server.
 - 🛡️ **Moderator‑Flow** (`deathban.moderator`): Statt Ban → Spectator bis Ablauf; GameMode‑Wechsel wird blockiert; nach Ablauf: Teleport zum sicheren Respawn (Bett/Anker, sonst Weltspawn) und Wechsel zurück nach SURVIVAL.
 - 📹 **Streamer‑Flow** (`deathban.streamer`): Wie Moderator, zusätzlich ein einmaliger **Kick direkt nach dem Tod** (sauberer Stream‑Cut). `deathban.streamer` impliziert den Moderator‑Flow – die zusätzliche `deathban.moderator`‑Permission ist nicht nötig.
 - 🧭 **Sicherer Respawn**: Ende der Sperre → Teleport auf höchste sichere Y über dem (Bett‑/Anker‑ oder Welt‑)Spawn und erst dann SURVIVAL, auch beim Rejoin.
-- 🧩 **PlaceholderAPI‑Integration**: `%deathban_players%`, `%deathban_mods%`, `%deathban_total%`, `%deathban_isdead%`, `%deathban_isdead_<Name>%`.
+- 🧩 **PlaceholderAPI‑Integration**: `%deathban_players%`, `%deathban_mods%`, `%deathban_total%`, `%deathban_isdead%`, `%deathban_isdead_<Name>%`, `%deathban_mod_remaining( _<Name>)%`, `%deathban_mod_until( _<Name>)%`, `%deathban_next*%`.
 - 🧰 **Kommandos & Autocomplete**: Komfortables Tab‑Completion (nur relevante Ziele bei `unban`/`modunban`).
 - 🧾 **Persistenz**: `bans.yml` (Spieler‑Bans) und `mod_spectate.yml` (Moderator/Streamer‑Sperren).
 
@@ -60,13 +60,13 @@ moderator:
     <gray>Stream-Übergang:</gray> <white>%spielername%</white> ist <white>%time%</white> gestorben (<gray>%todesgrund%</gray>).
     <gray>Du bist bis <white>%until%</white> im Zuschauermodus.</gray>
 
-# Welt-Bezeichnungen für %hingerichtete% -> %dimension_phrase%
+# Welt-Bezeichnungen für %dimension_phrase%
 worldNames:
   normal: "Oberwelt"
   nether: "Nether"
   the_end: "End"
 
-# Spieler mit Permission 'deathban.exposed'? – ausgenommen vom DeathBan
+# Spieler mit Permission 'deathban.exempt' sind ausgenommen
 respectExemptPermission: true
 ```
 
@@ -96,26 +96,38 @@ embed:
       inline: false
 ```
 
-## Platzhalter
-- `%spielername%`, `%X%`, `%Y%`, `%Z%`
-- `%dimension_phrase%` – „in der Oberwelt | im Nether | im End“
-- `%time%` / `%until%` – formatiert gemäß `dateTimeFormat`
-- `%remaining%` – verbleibende Dauer (z. B. `1d2h`)
-- `%timestamp%` – Unix‑Zeitstempel (für Discord `<t:%timestamp%>`)
-- `%todesgrund%` – humorvoller Grund je nach Todesursache (inkl. DiscordSRV‑Mention)
+## Platzhalter (Nachrichten/Discord)
+- `%spielername%` – Spielername (z. B. `t0g3pii`)
+- `%X%` / `%Y%` / `%Z%` – Block‑Koordinaten (z. B. `123`, `71`, `-19`)
+- `%dimension_phrase%` – „in der Oberwelt | im Nether | im End“ (z. B. `in der Oberwelt`)
+- `%time%` – formatiertes Todes‑Datum (z. B. `11.10.2025 20:15:00`)
+- `%until%` – formatiertes Ende (z. B. `12.10.2025 20:15:00`)
+- `%remaining%` – verbleibende Dauer (z. B. `23h59m`)
+- `%timestamp%` – Unix‑Zeit (z. B. `1760205888`)
+- `%todesgrund%` – humorvoller Grund (z. B. `wollte fliegen lernen.`)
 
-**PlaceholderAPI‑Expansion** (`deathban`):
-- `%deathban_players%` – Anzahl aktiver DeathBans
-- `%deathban_mods%` – Anzahl aktiver Moderator/Streamer‑Spectates
-- `%deathban_total%` – Summe aus beiden
-- `%deathban_isdead%` – `true/false`, ob der aufrufende Spieler aktuell "tot" ist (Ban oder Mod‑Spectate)
-- `%deathban_isdead_<Name>%` – `true/false` für einen konkreten Spieler (exakter Name)
+## PlaceholderAPI‑Expansion (`deathban`) – mit Beispielen
+- `%deathban_players%` → `2`
+- `%deathban_mods%` → `1`
+- `%deathban_total%` → `3`
+- `%deathban_isdead%` → `true` (wenn Aufrufer gebannt/Mod‑Spectate), sonst `false`
+- `%deathban_isdead_Spielername%` → `false`
+- `%deathban_mod_remaining%` → `3h12m`
+- `%deathban_mod_until%` → `11.10.2025 20:15:00`
+- `%deathban_mod_remaining_Spielername%` → `1d2h`
+- `%deathban_mod_until_Spielername%` → `12.10.2025 08:00:00`
+- `%deathban_next_mod%` → `ModName`
+- `%deathban_next_mod_remaining%` → `45m`
+- `%deathban_next_mod_until%` → `11.10.2025 21:00:00`
+- `%deathban_next%` → `SpielerOderMod`
+- `%deathban_next_remaining%` → `10m`
+- `%deathban_next_until%` → `11.10.2025 20:30:00`
 
 ## Befehle & Rechte
 - `/deathban` – ohne Rechte: kurze Plugin‑Info; mit Rechten: Hilfe
 - `/deathban reload` – Konfiguration neu laden (`deathban.admin`)
 - `/deathban unban <spieler>` – Spieler entbannen; meldet Fehler, wenn nicht gebannt (`deathban.admin`)
-- `/deathban remaining <spieler>` – Restzeit & Ende anzeigen (`deathban.admin`)
+- `/deathban remaining <spieler>` – Restzeit & Ende anzeigen (für Bans und Mod‑Spectate) (`deathban.admin`)
 - `/deathban list` – Aktive DeathBans auflisten (`deathban.admin`)
 - `/deathban listmods` – Aktive Moderator‑/Streamer‑Sperren auflisten (`deathban.admin`)
 - `/deathban modunban <spieler>` – Mod/Streamer freigeben; online: Teleport→SURVIVAL, offline: beim nächsten Join (`deathban.admin`)
