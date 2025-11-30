@@ -15,6 +15,7 @@ import de.t0g3pii.deathban.discord.DiscordNotifier;
 import de.t0g3pii.deathban.listener.DeathListener;
 import de.t0g3pii.deathban.listener.GameModeGuardListener;
 import de.t0g3pii.deathban.listener.JoinListener;
+import de.t0g3pii.deathban.listener.AdvancementGuardListener;
 import de.t0g3pii.deathban.papi.DeathBanExpansion;
 import de.t0g3pii.deathban.store.BanStore;
 import de.t0g3pii.deathban.store.ModSpectateRecord;
@@ -54,6 +55,7 @@ public final class NilsAngDeathBanPlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new DeathListener(service, getConfig(), discordCfg, discord, modSpectateStore, this), this);
 		getServer().getPluginManager().registerEvents(new JoinListener(service, getConfig(), modSpectateStore, this), this);
 		getServer().getPluginManager().registerEvents(new GameModeGuardListener(modSpectateStore, service.getPrefix()), this);
+		getServer().getPluginManager().registerEvents(new AdvancementGuardListener(modSpectateStore), this);
 		DeathBanCommand cmd = new DeathBanCommand(this);
 		getCommand("deathban").setExecutor(cmd);
 		getCommand("deathban").setTabCompleter(cmd);
