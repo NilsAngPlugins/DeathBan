@@ -11,6 +11,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.block.Block;
+import org.bukkit.Material;
 
 import de.t0g3pii.deathban.core.DeathBanService;
 import de.t0g3pii.deathban.discord.DiscordNotifier;
@@ -215,12 +218,31 @@ public class DeathListener implements Listener {
 			case "VOID": return who + " ist vom Rand der Welt gefallen.";
 			case "STARVATION": return who + " hat die Lunchbox vergessen.";
 			case "POISON": return who + " hat fragwürdige Pilze probiert.";
-			case "CONTACT": return who + " hat die Umarmung der Kakteen unterschätzt.";
+			case "CONTACT": {
+				if (last instanceof EntityDamageByBlockEvent) {
+					Block b = ((EntityDamageByBlockEvent) last).getDamager();
+					if (b != null) {
+						Material m = b.getType();
+						if (m == Material.CACTUS) {
+							return who + " hat die Umarmung der Kakteen unterschätzt.";
+						}
+						if (m == Material.SWEET_BERRY_BUSH) {
+							return who + " hat sich in einer Beerenhecke verfangen.";
+						}
+					}
+				}
+				return who + " hat sich an etwas Spitzem gestochen.";
+			}
 			case "SUFFOCATION": return who + " wurde von Blöcken erdrückt.";
 			case "BLOCK_EXPLOSION":
 			case "ENTITY_EXPLOSION": return who + " hat zu nah an der Party gefeiert.";
 			case "MAGIC": return who + " hat magische Nebenwirkungen erfahren.";
-			case "WITHER": return who + " hat den Wither unterschätzt.";
+			case "WITHER": {
+				if (isOnWitherRose(victim)) {
+					return "*Aua.. Au..* Die Rose hat " + who + " gebissen..";
+				}
+				return who + " hat den Wither unterschätzt.";
+			}
 			case "CRAMMING": return who + " stand etwas zu eng.";
 			case "PROJECTILE": return who + " hat ein fliegendes Geschenk gefangen.";
 			case "ENTITY_ATTACK": return who + " hat eine ungesunde Umarmung kassiert.";
@@ -256,5 +278,12 @@ public class DeathListener implements Listener {
 		if (m > 0) sb.append(m).append("m");
 		if (sb.length() == 0) sb.append(s).append("s");
 		return sb.toString();
+	}
+
+	private boolean isOnWitherRose(Player p) {
+		Location feet = p.getLocation();
+		if (feet.getBlock().getType() == Material.WITHER_ROSE) return true;
+		Location below = feet.clone().subtract(0, 1, 0);
+		return below.getBlock().getType() == Material.WITHER_ROSE;
 	}
 }
