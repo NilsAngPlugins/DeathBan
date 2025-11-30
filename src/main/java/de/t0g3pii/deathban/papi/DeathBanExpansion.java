@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.AbstractMap;
 
@@ -147,16 +148,19 @@ public class DeathBanExpansion extends PlaceholderExpansion {
 
 	private String modRemaining(UUID id) {
 		long now = Instant.now().getEpochSecond();
-		return plugin.getModSpectateStore().getUntil(id)
-				.filter(until -> until > now)
-				.map(until -> humanDuration(until - now))
-				.orElse("");
+		OptionalLong o = plugin.getModSpectateStore().getUntil(id);
+		if (o.isPresent() && o.getAsLong() > now) {
+			return humanDuration(o.getAsLong() - now);
+		}
+		return "";
 	}
 
 	private String modUntil(UUID id) {
-		return plugin.getModSpectateStore().getUntil(id)
-				.map(this::formatUntil)
-				.orElse("");
+		OptionalLong o = plugin.getModSpectateStore().getUntil(id);
+		if (o.isPresent()) {
+			return formatUntil(o.getAsLong());
+		}
+		return "";
 	}
 
 	private Optional<Map.Entry<UUID, ModSpectateRecord>> nextMod() {
